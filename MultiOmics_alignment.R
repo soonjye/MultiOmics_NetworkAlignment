@@ -5,25 +5,24 @@ library(visNetwork)
 source('MONA_function.R')
 
 
-##########Read Data ##########
+########## Read Data ##########
 omicsdatas <- list()
-## omicsdatas = list of matrix, with each matrix represents each omicsdata
+omicsdatas[[1]] <- read.delim('ExampleData/LUAD_1rna.tsv')
+omicsdatas[[2]] <- read.delim('ExampleData/LUAD_2pro.tsv')
+omicsdatas[[3]] <- read.delim('ExampleData/LUAD_3cnv.tsv')
+omicsdatas[[4]] <- read.delim('ExampleData/LUAD_4mirna.tsv')
+## omicsdatas = list of matrices, with each matrix represents each omicsdata
 
-for (i in 1:5) {
-  omicsdatas[[i]] <- read.delim(sprintf('ExampleData/timepoint%d.csv', i))
-}
-
-omicstypes <- c('rna', 'rna', 'rna', 'rna', 'rna')
+omicstypes <- c('rna', 'pro', 'cnv', 'mirna')
 ## omicstypes = vector of omicsdata type
 ## available option are c('rna', 'pro', 'cnv', 'mirna')
 
 
-##### Determine how many pairwise alignments are to be performed #####
-alignments <- determine_alignment(omicstypes)
-
-
 
 ########## Run pairwise alignments ##########
+alignments <- determine_alignment(omicstypes)
+## mirna will only pair with rna
+
 align_outputs <- list()
 for (i in 1:nrow(alignments)) {
   omic.x <- alignments$omic.x[i]
@@ -33,6 +32,7 @@ for (i in 1:nrow(alignments)) {
   align.type <- alignments$align.type[i]
   align_outputs[[i]] <- align_omics(omicsdatas[[omic.x]], omicsdatas[[omic.y]], omic.x.type, omic.y.type, align.type)
 }
+## align_outputs = list of list of tables. Each list represents results from each pairwise alignment.
 
 matchings   <- list()
 samplecors <- list()
@@ -45,15 +45,15 @@ for (i in 1:length(align_outputs)) {
 
 
 ########## Network alignment by looking at all pairwise alignment ##########
-comm_id <- network_alignment(omicstypes, alignments[1:7, ], matchings, samplecors)
-
+comm_id <- network_alignment(omicstypes, alignments, matchings, samplecors)
 colnames(comm_id) <- paste0(omicstypes, '_', 1:length(omicstypes))
 comm_id <- as.data.frame(comm_id)
 
-test <- apply(comm_id, 2, function(x) x == 1:nrow(comm_id))
-comm_id$mismatch <- apply(test, 1, function(x) FALSE %in% x)
+#for (i in 1:ncol(comm_id)) { print(which(1:nrow(comm_id) != comm_id[, i]))}
 
-for (i in 1:ncol(comm_id)) { print(which(1:nrow(comm_id) != comm_id[, i]))}
+#test <- apply(comm_id, 2, function(x) x == 1:nrow(comm_id))
+#comm_id$mismatch <- apply(test, 1, function(x) FALSE %in% x)
+
 
 
 
