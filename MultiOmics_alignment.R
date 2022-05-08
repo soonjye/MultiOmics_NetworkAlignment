@@ -45,7 +45,7 @@ for (i in 1:length(align_outputs)) {
 
 
 ########## Network alignment by looking at all pairwise alignment ##########
-comm_id <- network_alignment(omicstypes, alignments, matchings, samplecors)
+comm_id <- network_alignment(omicstypes, alignments[1:7, ], matchings, samplecors)
 
 colnames(comm_id) <- paste0(omicstypes, '_', 1:length(omicstypes))
 comm_id <- as.data.frame(comm_id)
@@ -53,7 +53,7 @@ comm_id <- as.data.frame(comm_id)
 test <- apply(comm_id, 2, function(x) x == 1:nrow(comm_id))
 comm_id$mismatch <- apply(test, 1, function(x) FALSE %in% x)
 
-#for (i in 1:ncol(comm_id)) { print(which(1:nrow(comm_id) != comm_id[, i]))}
+for (i in 1:ncol(comm_id)) { print(which(1:nrow(comm_id) != comm_id[, i]))}
 
 
 
